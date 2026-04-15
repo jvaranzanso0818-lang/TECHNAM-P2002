@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPT-20 · Flight Academy Reviewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2330;
+    --accent: #e8c840;
+    --accent2: #4a9eff;
+    --accent3: #ff4a4a;
+    --accent4: #4aff8c;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .header-logo span { color: var(--text-muted); font-weight: 300; }
+  .header-tabs {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--border); }
+  .tab-btn.active { background: var(--accent); color: #000; }
+
+  /* MAIN LAYOUT */
+  .app { display: flex; min-height: calc(100vh - 60px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 1rem;
+    flex-shrink: 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+    position: sticky;
+    top: 60px;
+  }
+  .sidebar-section { margin-bottom: 2rem; }
+  .sidebar-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(232,200,64,0.1); color: var(--accent); border-color: rgba(232,200,64,0.2); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--border);
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* CONTENT */
+  .content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+  }
+
+  /* PAGE TITLE */
+  .page-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+  }
+  .page-sub {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--accent));
+  }
+  .card:hover { border-color: var(--card-accent, var(--accent)); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .card-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+  .card-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* SECTION PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* INSTRUMENT GRID */
+  .instrument-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .instrument-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    transition: all 0.15s;
+  }
+  .instrument-card:hover { border-color: var(--accent2); }
+  .instrument-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent2);
+    margin-bottom: 0.3rem;
+  }
+  .instrument-desc { font-size: 0.83rem; color: var(--text-dim); line-height: 1.5; }
+  .instrument-loc {
+    margin-top: 0.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    background: var(--surface2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+  .data-table th {
+    background: var(--surface2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: middle;
+  }
+  .data-table tr:hover td { background: var(--surface2); color: var(--text); }
+  .data-table .val { font-family: 'Space Mono', monospace; color: var(--accent); font-size: 0.85rem; }
+  .data-table .val.red { color: var(--accent3); }
+  .data-table .val.green { color: var(--accent4); }
+  .data-table .val.blue { color: var(--accent2); }
+
+  /* CHECKLIST */
+  .checklist-group { margin-bottom: 2rem; }
+  .checklist-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    border-left: 3px solid var(--accent);
+    padding-left: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border: 1px solid transparent;
+  }
+  .checklist-item:hover { background: var(--surface2); }
+  .checklist-item.checked { background: rgba(74,255,140,0.05); border-color: rgba(74,255,140,0.15); }
+  .check-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    transition: all 0.15s;
+  }
+  .checklist-item.checked .check-box { background: var(--accent4); border-color: var(--accent4); color: #000; }
+  .check-label { font-size: 0.88rem; color: var(--text-dim); flex: 1; }
+  .check-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: right;
+  }
+  .check-reset {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: all 0.15s;
+  }
+  .check-reset:hover { border-color: var(--accent3); color: var(--accent3); }
+
+  /* QUIZ */
+  .quiz-container { max-width: 720px; }
+  .quiz-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .progress-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+  }
+  .quiz-category {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+  .quiz-question {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .quiz-option {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1.2rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--accent2); color: var(--text); background: rgba(74,158,255,0.08); }
+  .quiz-option.correct { border-color: var(--accent4); background: rgba(74,255,140,0.1); color: var(--accent4); }
+  .quiz-option.wrong { border-color: var(--accent3); background: rgba(255,74,74,0.08); color: var(--accent3); }
+  .quiz-option:disabled { cursor: default; }
+  .opt-letter {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .quiz-option.correct .opt-letter { background: var(--accent4); color: #000; }
+  .quiz-option.wrong .opt-letter { background: var(--accent3); color: #fff; }
+  .quiz-feedback {
+    margin-top: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: rgba(74,255,140,0.08); border: 1px solid rgba(74,255,140,0.2); color: var(--accent4); }
+  .quiz-feedback.wrong-fb { background: rgba(255,74,74,0.06); border: 1px solid rgba(255,74,74,0.2); color: var(--text-dim); }
+  .quiz-next {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    display: none;
+    transition: all 0.15s;
+  }
+  .quiz-next:hover { background: #f5d84a; }
+  .quiz-next.show { display: inline-block; }
+  .quiz-score {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+  .quiz-score.show { display: block; }
+  .score-big {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 5rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-label { color: var(--text-muted); margin: 0.5rem 0 1.5rem; }
+  .score-restart {
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .score-restart:hover { background: var(--accent); color: #000; }
+
+  /* EMERGENCY */
+  .emergency-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .emergency-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .emergency-header {
+    background: rgba(255,74,74,0.1);
+    border-bottom: 1px solid rgba(255,74,74,0.2);
+    padding: 0.75rem 1rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .emergency-body { padding: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s, padding 0.3s; }
+  .emergency-body.open { max-height: 600px; padding: 1rem; }
+  .emerg-step {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .emerg-step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent3);
+    width: 20px;
+    flex-shrink: 0;
+    padding-top: 0.1rem;
+  }
+  .step-action { font-weight: 500; color: var(--text); min-width: 140px; }
+  .step-val { color: var(--text-muted); font-family: 'Space Mono', monospace; font-size: 0.78rem; margin-left: auto; }
+  .step-val.crit { color: var(--accent3); }
+
+  /* FLASHCARDS */
+  .flashcard-scene {
+    perspective: 1200px;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+  }
+  .flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+  }
+  .flashcard-inner.flipped { transform: rotateY(180deg); }
+  .flashcard-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  .flashcard-front { background: var(--surface); }
+  .flashcard-back { background: var(--surface2); transform: rotateY(180deg); border-color: var(--accent2); }
+  .fc-hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+  }
+  .fc-q {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+  }
+  .fc-a {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--accent);
+    line-height: 1.5;
+  }
+  .fc-a-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
+  .flashcard-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .fc-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .fc-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .fc-counter {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    flex: 1;
+    text-align: center;
+  }
+  .fc-cat-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+  }
+
+  /* PROCEDURES */
+  .procedure-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .procedure-header {
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .procedure-header:hover { background: var(--surface2); }
+  .procedure-header.open { border-bottom-color: var(--border); }
+  .proc-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .proc-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: var(--surface2);
+    color: var(--text-muted);
+  }
+  .procedure-body { padding: 0; max-height: 0; overflow: hidden; transition: max-height 0.4s, padding 0.3s; }
+  .procedure-body.open { max-height: 1000px; padding: 1.2rem; }
+  .proc-phase {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 1rem 0 0.5rem;
+    padding: 0.3rem 0.6rem;
+    background: rgba(232,200,64,0.08);
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .proc-step {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+  .proc-step:last-child { border-bottom: none; }
+  .proc-label { flex: 1; }
+  .proc-action {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent4);
+    white-space: nowrap;
+  }
+  .proc-action.crit { color: var(--accent3); }
+  .proc-action.amber { color: var(--accent); }
+  .proc-note {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(74,158,255,0.06);
+    border: 1px solid rgba(74,158,255,0.15);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: var(--accent2);
+    line-height: 1.5;
+  }
+  .proc-note.warn { background: rgba(255,74,74,0.05); border-color: rgba(255,74,74,0.15); color: var(--accent3); }
+
+  /* SPEEDS TABLE */
+  .speed-tag {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .tag-red { background: rgba(255,74,74,0.15); color: var(--accent3); }
+  .tag-green { background: rgba(74,255,140,0.12); color: var(--accent4); }
+  .tag-yellow { background: rgba(232,200,64,0.12); color: var(--accent); }
+  .tag-blue { background: rgba(74,158,255,0.12); color: var(--accent2); }
+
+  /* ABCDE EMERGENCY */
+  .abcde-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+  }
+  .abcde-letter {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--accent3);
+    width: 60px;
+    flex-shrink: 0;
+  }
+  .abcde-content { flex: 1; }
+  .abcde-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .abcde-items { font-size: 0.88rem; color: var(--text-dim); line-height: 1.8; }
+  .abcde-items strong { color: var(--text); }
+
+  /* HOME STATS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2.5rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .stat-lbl { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* PATTERN */
+  .pattern-phase {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+  }
+  .phase-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-top: 0.2rem;
+  }
+  .badge-up { background: rgba(74,255,140,0.15); color: var(--accent4); }
+  .badge-cross { background: rgba(74,158,255,0.15); color: var(--accent2); }
+  .badge-down { background: rgba(255,74,74,0.12); color: var(--accent3); }
+  .badge-base { background: rgba(232,200,64,0.12); color: var(--accent); }
+  .badge-final { background: rgba(200,100,255,0.15); color: #c864ff; }
+  .phase-content { flex: 1; }
+  .phase-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+  }
+  .phase-items { font-size: 0.84rem; color: var(--text-dim); line-height: 1.8; }
+  .phase-items strong { color: var(--accent); font-family: 'Space Mono', monospace; font-size: 0.8em; }
+
+  /* DIFF badge */
+  .diff { font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 3px; }
+  .diff-p2002s { background: rgba(74,158,255,0.15); color: var(--accent2); }
+  .diff-p2002jf { background: rgba(74,255,140,0.12); color: var(--accent4); }
+  .diff-both { background: rgba(232,200,64,0.1); color: var(--accent); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .header-tabs .tab-btn { font-size: 0.7rem; padding: 0.35rem 0.6rem; }
+    .content { padding: 1rem; }
+  }
+
+  /* Scroll */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  .section-header {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-header::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .toggle-chevron { font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s; }
+  .toggle-chevron.open { transform: rotate(180deg); }
+
+  .radio-script {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .radio-pilot { color: var(--text-dim); }
+  .radio-twr { color: var(--accent3); }
+  .radio-call { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">RPT-20 <span>// Flight Reviewer</span></div>
+  <div class="header-tabs">
+    <button class="tab-btn active" onclick="switchTab('home')">Home</button>
+    <button class="tab-btn" onclick="switchTab('cockpit')">Cockpit</button>
+    <button class="tab-btn" onclick="switchTab('procedures')">Procedures</button>
+    <button class="tab-btn" onclick="switchTab('emergency')">Emergency</button>
+    <button class="tab-btn" onclick="switchTab('pattern')">Pattern</button>
+    <button class="tab-btn" onclick="switchTab('quiz')">Quiz</button>
+    <button class="tab-btn" onclick="switchTab('flashcards')">Flash</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" onclick="switchSection('home')"><span class="nav-icon">⌂</span> Home</div>
+      <div class="nav-item" onclick="switchSection('cockpit')"><span class="nav-icon">🎛</span> Cockpit Layout</div>
+      <div class="nav-item" onclick="switchSection('instruments')"><span class="nav-icon">⚙️</span> Instruments</div>
+      <div class="nav-item" onclick="switchSection('speeds')"><span class="nav-icon">📊</span> Speed Limits</div>
+      <div class="nav-item" onclick="switchSection('procedures')"><span class="nav-icon">✅</span> Checklists</div>
+      <div class="nav-item" onclick="switchSection('airwork')"><span class="nav-icon">✈️</span> Air Exercises</div>
+      <div class="nav-item" onclick="switchSection('pattern')"><span class="nav-icon">🔄</span> Traffic Pattern</div>
+      <div class="nav-item" onclick="switchSection('emergency')"><span class="nav-icon">⚠️</span> Emergency</div>
+      <div class="nav-item" onclick="switchSection('radio')"><span class="nav-icon">📡</span> Radio Comms</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Review Tools</div>
+      <div class="nav-item" onclick="switchSection('quiz')"><span class="nav-icon">🎯</span> Quiz Mode <span class="nav-badge">40Q</span></div>
+      <div class="nav-item" onclick="switchSection('flashcards')"><span class="nav-icon">🃏</span> Flashcards <span class="nav-badge">35</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Aircraft</div>
+      <div class="nav-item" onclick="switchSection('p2002s')"><span class="nav-icon">🛩</span> P2002 Sierra</div>
+      <div class="nav-item" onclick="switchSection('p2002jf')"><span class="nav-icon">🛩</span> P2002 JF</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME -->
+    <div id="sec-home" class="panel active">
+      <div class="page-title">WCC Pilot Academy</div>
+      <div class="page-sub">// TECNAM P2002 · RPT-20 · Binalonan</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num">2</div><div class="stat-lbl">Aircraft Types</div></div>
+        <div class="stat-card"><div class="stat-num">7</div><div class="stat-lbl">Fleet (Sierra+JF)</div></div>
+        <div class="stat-card"><div class="stat-num">138</div><div class="stat-lbl">VNE (kts)</div></div>
+        <div class="stat-card"><div class="stat-num">35</div><div class="stat-lbl">Flashcards</div></div>
+      </div>
+      <div class="cards-grid">
+        <div class="card" style="--card-accent:#4a9eff" onclick="switchSection('cockpit')">
+          <div class="card-icon">🎛</div>
+          <div class="card-title">Cockpit Familiarization</div>
+          <div class="card-desc">Instrument locations for P2002 Sierra & JF. Learn what each gauge does.</div>
+        </div>
+        <div class="card" style="--card-accent:#e8c840" onclick="switchSection('procedures')">
+          <div class="card-icon">✅</div>
+          <div class="card-title">Checklists</div>
+          <div class="card-desc">Full pre-flight, run-up, takeoff, landing and shutdown checklists.</div>
+        </div>
+        <div class="card" style="--card-accent:#ff4a4a" onclick="switchSection('emergency')">
+          <div class="card-icon">⚠️</div>
+          <div class="card-title">Emergency Procedures</div>
+          <div class="card-desc">A.B.C.D.E framework, engine failure, fire, forced landings.</div>
+        </div>
+        <div class="card" style="--card-accent:#4aff8c" onclick="switchSection('pattern')">
+          <div class="card-icon">🔄</div>
+          <div class="card-title">Traffic Pattern</div>
+          <div class="card-desc">RWY 17/35 procedures. Upwind, crosswind, downwind, base, final.</div>
+        </div>
+        <div class="card" style="--card-accent:#c864ff" onclick="switchSection('airwork')">
+          <div class="card-icon">✈️</div>
+          <div class="card-title">Air Exercises</div>
+          <div class="card-desc">Climbs, descents, turns, slow flight, stalls. P-A-S-T procedure.</div>
+        </div>
+        <div class="card" style="--card-accent:#ff9a4a" onclick="switchSection('speeds')">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Speeds & Limits</div>
+          <div class="card-desc">V-speeds, airspeed markings, powerplant limits, weight data.</div>
+        </div>
+        <div class="card" style="--card-accent:#4aff8c" onclick="switchSection('quiz')">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">Quiz Mode</div>
+          <div class="card-desc">Test your knowledge across all topics. 40 questions.</div>
+        </div>
+        <div class="card" style="--card-accent:#4a9eff" onclick="switchSection('flashcards')">
+          <div class="card-icon">🃏</div>
+          <div class="card-title">Flashcards</div>
+          <div class="card-desc">Tap to flip. Study V-speeds, procedures, and cockpit items.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COCKPIT -->
+    <div id="sec-cockpit" class="panel">
+      <div class="page-title">Cockpit Layout</div>
+      <div class="page-sub">// P2002 Sierra (RP-C1886, RP-C1993) & P2002 JF (RP-C1971/72/75, RP-C4604/05)</div>
+
+      <div class="section-header">Flight Instruments <span class="diff diff-both">BOTH</span></div>
+      <div class="instrument-grid">
+        <div class="instrument-card">
+          <div class="instrument-name">Airspeed Indicator (ASI)</div>
+          <div class="instrument-desc">Shows aircraft airspeed. White arc: flap operating range. Green: normal cruise. Yellow: caution. Red: never exceed.</div>
+          <div class="instrument-loc">LEFT PANEL · TOP LEFT</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Attitude Indicator (AI)</div>
+          <div class="instrument-desc">Shows aircraft pitch and bank. Gyroscopic instrument. Blue = sky, brown = ground.</div>
+          <div class="instrument-loc">LEFT PANEL · CENTER</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Altimeter</div>
+          <div class="instrument-desc">Shows altitude in feet. Must be set with current altimeter setting (QNH). Kollsman window for pressure setting.</div>
+          <div class="instrument-loc">LEFT PANEL · TOP RIGHT</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Turn Coordinator (TC)</div>
+          <div class="instrument-desc">Shows rate of turn and coordination (ball). Ball centered = coordinated flight. Electrical instrument.</div>
+          <div class="instrument-loc">LEFT PANEL · BOTTOM LEFT</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Heading Indicator (HI)</div>
+          <div class="instrument-desc">Shows magnetic heading. Gyroscopic — must be aligned with magnetic compass. Subject to precession.</div>
+          <div class="instrument-loc">LEFT PANEL · BOTTOM CENTER</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Vertical Speed Indicator (VSI)</div>
+          <div class="instrument-desc">Shows rate of climb/descent in feet per minute. Pneumatic instrument. Slight lag during rapid changes.</div>
+          <div class="instrument-loc">LEFT PANEL · BOTTOM RIGHT</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Magnetic Compass</div>
+          <div class="instrument-desc">Primary heading reference. Subject to magnetic deviation. Unreliable in turns and acceleration/deceleration.</div>
+          <div class="instrument-loc">TOP CENTER · GLARE SHIELD</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Suction Gauge</div>
+          <div class="instrument-desc">Shows vacuum pressure for gyroscopic instruments (AI, HI). Normal range: 4.5–5.5 in Hg. Green arc required.</div>
+          <div class="instrument-loc">LEFT PANEL · UPPER LEFT</div>
+        </div>
+      </div>
+
+      <div class="section-header">Engine Instruments <span class="diff diff-both">BOTH</span></div>
+      <div class="instrument-grid">
+        <div class="instrument-card">
+          <div class="instrument-name">Tachometer (RPM)</div>
+          <div class="instrument-desc">Shows engine RPM. Rotax 912S2. Max continuous: 5500 RPM. Max T/O (5 min): 5800 RPM.</div>
+          <div class="instrument-loc">RIGHT PANEL · TOP</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Oil Pressure Indicator</div>
+          <div class="instrument-desc">Monitor during flight. Normal: 2–7 bar. Min: 0.8 bar → LAND. Max: 7 bar → reduce power.</div>
+          <div class="instrument-loc">RIGHT PANEL · UPPER</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Oil Temperature Indicator</div>
+          <div class="instrument-desc">Normal: 90–130°C. Min: 50°C before takeoff. Max: 130°C. Allow warmup to 50°C at 1000–1200 RPM.</div>
+          <div class="instrument-loc">RIGHT PANEL · UPPER</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Cylinder Head Temp (CHT)</div>
+          <div class="instrument-desc">Monitor cylinder head temperature. Max 135°C. If exceeded: reduce power, land. Engine marked SECURE.</div>
+          <div class="instrument-loc">RIGHT PANEL · CENTER</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Fuel Pressure</div>
+          <div class="instrument-desc">Min: 0.15 bar (2.2 psi). Normal: 0.4 bar (5.8 psi) max. Low fuel pressure = turn on electric fuel pump.</div>
+          <div class="instrument-loc">RIGHT PANEL</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Fuel Tank Indicators</div>
+          <div class="instrument-desc">Left and right tank fuel quantities. Total capacity: 100L (99L usable, 1L unusable total). 50L per tank.</div>
+          <div class="instrument-loc">RIGHT PANEL · CENTER</div>
+        </div>
+      </div>
+
+      <div class="section-header">Electrical Instruments <span class="diff diff-both">BOTH</span></div>
+      <div class="instrument-grid">
+        <div class="instrument-card">
+          <div class="instrument-name">Voltmeter</div>
+          <div class="instrument-desc">Normal: 12–14V. Min (red line): 10.5V. If generator light illuminates (above 16V) → shut down alternator.</div>
+          <div class="instrument-loc">RIGHT PANEL</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Ammeter</div>
+          <div class="instrument-desc">Shows electrical load. Monitor with voltmeter. Battery can operate for 20 minutes if generator fails.</div>
+          <div class="instrument-loc">RIGHT PANEL</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Outside Air Temperature (OAT)</div>
+          <div class="instrument-desc">Monitors outside air temperature. Used for density altitude calculations and icing assessments (OAT &lt;10°C with moisture).</div>
+          <div class="instrument-loc">RIGHT PANEL · LOWER</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Flap Indicator</div>
+          <div class="instrument-desc">Shows current flap position: UP, T/O, FULL. Each setting changes stall speed, lift, and drag characteristics.</div>
+          <div class="instrument-loc">RIGHT PANEL · TOP</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Chronometer</div>
+          <div class="instrument-desc">Elapsed time display. Start at engine start to monitor flight time, fuel consumption, and timing maneuvers.</div>
+          <div class="instrument-loc">CENTER PANEL</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Trim Indicator</div>
+          <div class="instrument-desc">Shows pitch trim position. Set to NEUTRAL for normal takeoff. Trim reduces control pressure on the stick.</div>
+          <div class="instrument-loc">TOP LEFT · PANEL</div>
+        </div>
+      </div>
+
+      <div class="section-header">Controls & Switches <span class="diff diff-both">BOTH</span></div>
+      <div class="instrument-grid">
+        <div class="instrument-card">
+          <div class="instrument-name">Master Switch & Generator</div>
+          <div class="instrument-desc">Master switch powers all electrical. Generator switch must also be ON during flight. Both off during engine securing.</div>
+          <div class="instrument-loc">LOWER LEFT PANEL</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Ignition Switch</div>
+          <div class="instrument-desc">Positions: OFF, L, R, BOTH, START. Always set to BOTH for flight. Check mag drop during run-up (max 130 RPM drop).</div>
+          <div class="instrument-loc">LOWER CENTER</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Electric Fuel Pump Switch</div>
+          <div class="instrument-desc">Backup fuel delivery. ON for: engine start, takeoff, landing, and when low fuel pressure occurs in flight.</div>
+          <div class="instrument-loc">LOWER PANEL</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Carburetor Heat</div>
+          <div class="instrument-desc">Prevents/removes carb ice. Use when below green arc or in visible moisture with OAT &lt;10°C. Expected RPM drop then recovery.</div>
+          <div class="instrument-loc">LOWER RIGHT</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Throttle & Friction</div>
+          <div class="instrument-desc">Main throttle controls power (RPM). Throttle friction lock prevents creep. Rotax 912S2 — liquid cooled.</div>
+          <div class="instrument-loc">CENTER CONSOLE</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Flaps Selector Knob</div>
+          <div class="instrument-desc">Rotary selector: UP, T/O, FULL. Deploy only within white arc (30–67 kts). Each position affects lift and drag.</div>
+          <div class="instrument-loc">CENTER CONSOLE / LOWER</div>
+        </div>
+      </div>
+
+      <div class="section-header">Avionics <span class="diff diff-both">BOTH</span></div>
+      <div class="instrument-grid">
+        <div class="instrument-card">
+          <div class="instrument-name">Radio (COM)</div>
+          <div class="instrument-desc">Communications radio. Primary frequency for RPT-20 area: Binalonan Radio. Emergency: 121.5 MHz.</div>
+          <div class="instrument-loc">CENTER STACK</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Transponder</div>
+          <div class="instrument-desc">Code 1200 for VFR. ALT mode for altitude encoding. Squawk 7700 for emergencies on Class G airspace.</div>
+          <div class="instrument-loc">CENTER STACK</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">Intercom</div>
+          <div class="instrument-desc">Pilot-passenger communication. Also interfaces with radio for transmission. Check before flight.</div>
+          <div class="instrument-loc">CENTER STACK TOP</div>
+        </div>
+        <div class="instrument-card" style="border-color: rgba(74,255,140,0.3)">
+          <div class="instrument-name">Avionics Master <span style="color:var(--accent4);font-size:0.7rem">P2002JF ONLY</span></div>
+          <div class="instrument-desc">Controls power to avionics stack. NOTE: RP-C1886 and RP-C1993 (Sierra) do NOT have an avionics master switch.</div>
+          <div class="instrument-loc">LOWER LEFT (JF ONLY)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUMENTS (sub-panel via sidebar) -->
+    <div id="sec-instruments" class="panel">
+      <div class="page-title">Speed Markings</div>
+      <div class="page-sub">// Airspeed Indicator Arc Markings · P2002JF</div>
+      <table class="data-table">
+        <thead><tr><th>Marking</th><th>Range</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><span class="speed-tag tag-green">White Arc</span></td><td class="val green">30–67 kts</td><td>Flap operating range (Vso to Vfe)</td></tr>
+          <tr><td><span class="speed-tag tag-green">Green Arc</span></td><td class="val green">40–110 kts</td><td>Normal operating range</td></tr>
+          <tr><td><span class="speed-tag tag-yellow">Yellow Arc</span></td><td class="val">110–138 kts</td><td>Caution – smooth air only</td></tr>
+          <tr><td><span class="speed-tag tag-red">Red Line</span></td><td class="val red">138 kts</td><td>VNE – Never Exceed Speed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SPEEDS -->
+    <div id="sec-speeds" class="panel">
+      <div class="page-title">V-Speeds &amp; Limits</div>
+      <div class="page-sub">// Tecnam P2002JF · Rotax 912S2</div>
+
+      <div class="section-header">Critical V-Speeds</div>
+      <table class="data-table">
+        <thead><tr><th>Speed</th><th>Symbol</th><th>Book</th><th>Actual/Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Never Exceed Speed</td><td class="val red">VNE</td><td class="val red">138 kts</td><td>DO NOT EXCEED – ever</td></tr>
+          <tr><td>Max Structural Cruise</td><td class="val">VNO</td><td class="val">110 kts</td><td>Smooth air only above this</td></tr>
+          <tr><td>Maneuvering Speed</td><td class="val blue">VA</td><td class="val blue">96 kts</td><td>No full/abrupt control above</td></tr>
+          <tr><td>Max Flap Extended (Full)</td><td class="val">VFE</td><td class="val">67 kts</td><td>69 kts actual</td></tr>
+          <tr><td>Max Flap Extended (T/O)</td><td class="val">VFE T/O</td><td class="val">97 kts</td><td>95 kts actual</td></tr>
+          <tr><td>Best Angle of Climb</td><td class="val green">Vx</td><td class="val green">56 kts</td><td>Clears obstacles</td></tr>
+          <tr><td>Best Rate of Climb</td><td class="val green">Vy</td><td class="val green">66 kts</td><td>65 kts actual</td></tr>
+          <tr><td>Approach Speed</td><td class="val">Vapp</td><td class="val">66 kts</td><td>65 kts actual, Flaps T/O</td></tr>
+          <tr><td>Final Approach Speed</td><td class="val">Vapp final</td><td class="val">51 kts</td><td>60–65 kts actual full flaps</td></tr>
+          <tr><td>Glide Speed</td><td class="val">Vglide</td><td class="val">69 kts</td><td>70 kts actual, best glide</td></tr>
+          <tr><td>Rotation Speed</td><td class="val">Vr</td><td class="val">42 kts</td><td>60 kts actual (real conditions)</td></tr>
+          <tr><td>Stall Speed (Clean)</td><td class="val">Vs</td><td class="val">40 kts</td><td>Flaps up, 0° bank</td></tr>
+          <tr><td>Stall Speed (Flaps Full)</td><td class="val">Vso</td><td class="val">30 kts</td><td>Landing configuration</td></tr>
+          <tr><td>Crosswind Limit</td><td class="val">Xcw</td><td class="val">22 kts</td><td>Maximum demonstrated</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-header">Engine Limits · Rotax 912S2</div>
+      <table class="data-table">
+        <thead><tr><th>Parameter</th><th>Min</th><th>Normal</th><th>Max</th></tr></thead>
+        <tbody>
+          <tr><td>RPM – Max Takeoff (5 min)</td><td>—</td><td class="val">2388 RPM</td><td class="val red">2388 RPM</td></tr>
+          <tr><td>RPM – Max Continuous</td><td>—</td><td class="val">2265 RPM</td><td class="val">2265 RPM</td></tr>
+          <tr><td>RPM – Idle</td><td class="val">580</td><td class="val">580</td><td>—</td></tr>
+          <tr><td>Oil Pressure</td><td class="val red">0.8 bar</td><td class="val green">2–5 bar</td><td class="val red">7 bar</td></tr>
+          <tr><td>Oil Temperature</td><td class="val">50°C</td><td class="val green">90–110°C</td><td class="val red">130°C</td></tr>
+          <tr><td>CHT</td><td>—</td><td class="val green">Normal</td><td class="val red">135°C</td></tr>
+          <tr><td>Voltmeter</td><td class="val red">10.5V</td><td class="val green">12–14V</td><td>—</td></tr>
+          <tr><td>Suction Gauge</td><td class="val red">4.0 in Hg</td><td class="val green">4.5–5.5 in Hg</td><td>—</td></tr>
+          <tr><td>Oil Capacity</td><td>2.0L</td><td class="val">—</td><td class="val">3.0L</td></tr>
+          <tr><td>Fuel (Total)</td><td>—</td><td class="val">100L</td><td>—</td></tr>
+          <tr><td>Fuel (Usable)</td><td>—</td><td class="val">99L</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-header">Weight &amp; Performance</div>
+      <table class="data-table">
+        <thead><tr><th>Item</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Max Takeoff Weight</td><td class="val">580 kg</td></tr>
+          <tr><td>Max Landing Weight</td><td class="val">580 kg</td></tr>
+          <tr><td>Standard Empty Weight</td><td class="val">337 kg</td></tr>
+          <tr><td>Useful Load</td><td class="val">243 kg</td></tr>
+          <tr><td>Max Baggage</td><td class="val">20 kg</td></tr>
+          <tr><td>Max Altitude</td><td class="val">14,000 ft MSL</td></tr>
+          <tr><td>Takeoff Run</td><td class="val">218 m / 360 m</td></tr>
+          <tr><td>Landing Roll</td><td class="val">154 m / 302 m</td></tr>
+          <tr><td>Glide Ratio</td><td class="val">12.8 (no wind)</td></tr>
+          <tr><td>Wingspan</td><td class="val">8.6 m</td></tr>
+          <tr><td>Length</td><td class="val">6.61 m</td></tr>
+          <tr><td>Fuel Type</td><td class="val">MOGAS / AVGAS 100LL</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PROCEDURES -->
+    <div id="sec-procedures" class="panel">
+      <div class="page-title">Checklists</div>
+      <div class="page-sub">// P2002JF Normal Procedures · Tap to expand · Check items off</div>
+      <button class="check-reset" onclick="resetChecks()">↺ Reset All Checks</button>
+
+      <div id="checklists-container"></div>
+    </div>
+
+    <!-- AIR EXERCISES -->
+    <div id="sec-airwork" class="panel">
+      <div class="page-title">Air Exercises</div>
+      <div class="page-sub">// PAST Procedures · P-A-S-T Entry · A-S-P-T Exit (Climb)</div>
+
+      <div class="procedure-card">
+        <div class="procedure-header" onclick="toggleProc(this)">
+          <div class="proc-title">✈️ Straight and Level</div>
+          <div style="display:flex;gap:.5rem;align-items:center"><span class="proc-tag">APPLICATION: Cruise</span><span class="toggle-chevron">▼</span></div>
+        </div>
+        <div class="procedure-body">
+          <div class="proc-note">Power + Attitude = Performance (SSAA). APAL Check while maintaining: Attitude → Performance → Attitude → Lookout</div>
+          <table class="data-table" style="margin-top:1rem">
+            <thead><tr><th>Mode</th><th>Power</th><th>Attitude</th><th>Speed</th></tr></thead>
+            <tbody>
+              <tr><td>Normal</td><td class="val">2100 RPM</td><td>As required</td><td class="val">80 KIAS</td></tr>
+              <tr><td>Fast</td><td class="val">2500 RPM</td><td>More land, less sky</td><td class="val">90+ KIAS</td></tr>
+              <tr><td>Slow</td><td class="val">1900 RPM</td><td>More sky, less land</td><td class="val">60–70 KIAS</td></tr>
+            </tbody>
+          </table>
+          <div class="proc-note" style="margin-top:.75rem">Tolerance: Airspeed ±10 kts · Altitude ±100 ft · Heading ±10°</div>
+        </div>
+      </div>
+
+      <div class="procedure-card">
+        <div class="procedure-header" onclick="toggleProc(this)">
+          <div class="proc-title">⬆️ Climb (Vy)</div>
+          <div style="display:flex;gap:.5rem;align-items:center"><span class="proc-tag">ENTRY P-A-S-T · EXIT A-S-P-T</span><span class="toggle-chevron">▼</span></div>
+        </div>
+        <div class="procedure-body">
+          <div class="proc-phase">ENTRY</div>
+          <div class="proc-step"><div class="proc-label">P – Power</div><div class="proc-action">FULL POWER</div></div>
+          <div class="proc-step"><div class="proc-label">A – Attitude</div><div class="proc-action amber">500 FPM pitch up</div></div>
+          <div class="proc-step"><div class="proc-label">S – Speed</div><div class="proc-action">65 kts</div></div>
+          <div class="proc-step"><div class="proc-label">T – Trim</div><div class="proc-action">As required</div></div>
+          <div class="proc-phase">EXIT (at exact altitude)</div>
+          <div class="proc-step"><div class="proc-label">A – Level off</div><div class="proc-action">Level attitude</div></div>
+          <div class="proc-step"><div class="proc-label">S – Speed increasing</div><div class="proc-action amber">A/S 80 kts</div></div>
+          <div class="proc-step"><div class="proc-label">P – Power</div><div class="proc-action">1800 RPM</div></div>
+          <div class="proc-step"><div class="proc-label">T – Trim</div><div class="proc-action">As required</div></div>
+          <div class="proc-note">100 ft before altitude: call "Approaching ___ ft." · Tolerance: ±5 kts / ±100 ft / ±10°</div>
+        </div>
+      </div>
+
+      <div class="procedure-card">
+        <div class="procedure-header" onclick="toggleProc(this)">
+          <div class="proc-title">⬇️ Descent</div>
+          <div style="display:flex;gap:.5rem;align-items:center"><span class="proc-tag">ENTRY P-A-S-T · EXIT P-A-S-T</span><span class="toggle-chevron">▼</span></div>
+        </div>
+        <div class="procedure-body">
+          <div class="proc-phase">ENTRY</div>
+          <div class="proc-step"><div class="proc-label">P – Power</div><div class="proc-action">1400–1500 RPM</div></div>
+          <div class="proc-step"><div class="proc-label">A – Attitude</div><div class="proc-action amber">500 FPM pitch down</div></div>
+          <div class="proc-step"><div class="proc-label">S – Speed</div><div class="proc-action">70 kts</div></div>
+          <div class="proc-step"><div class="proc-label">T – Trim</div><div class="proc-action">As required</div></div>
+          <div class="proc-phase">EXIT (at 50 ft before altitude)</div>
+          <div class="proc-step"><div class="proc-label">P – Power</div><div class="proc-action amber">1800 RPM</div></div>
+          <div class="proc-step"><div class="proc-label">A – Level off</div><div class="proc-action">Straight & Level</div></div>
+          <div class="proc-step"><div class="proc-label">S – Speed increasing</div><div class="proc-action">80 kts</div></div>
+          <div class="proc-step"><div class="proc-label">T – Trim</div><div class="proc-action">As required</div></div>
+        </div>
+      </div>
+
+      <div class="procedure-card">
+        <div class="procedure-header" onclick="toggleProc(this)">
+          <div class="proc-title">↩️ Level Turns</div>
+          <div style="display:flex;gap:.5rem;align-items:center"><span class="proc-tag">ENTRY B-B-B · EXIT B-B-B</span><span class="toggle-chevron">▼</span></div>
+        </div>
+        <div class="procedure-body">
+          <div class="proc-phase">ENTRY (after Clearing Turns L-C-R CLEAR)</div>
+          <div class="proc-step"><div class="proc-label">B – Bank</div><div class="proc-action amber">___ deg L/R</div></div>
+          <div class="proc-step"><div class="proc-label">B – Back Pressure</div><div class="proc-action">Apply</div></div>
+          <div class="proc-step"><div class="proc-label">B – Balance</div><div class="proc-action">Ball centered</div></div>
+          <div class="proc-phase">EXIT (rollout at HALF bank angle before heading)</div>
+          <div class="proc-step"><div class="proc-label">B – Rolling out</div><div class="proc-action amber">Opposite bank</div></div>
+          <div class="proc-step"><div class="proc-label">B – Back Pressure</div><div class="proc-action">Release</div></div>
+          <div class="proc-step"><div class="proc-label">B – Balance</div><div class="proc-action">Ball centered</div></div>
+          <div class="proc-note">10° before heading: call "Approaching ___". Start rollout at HALF your bank angle before heading. e.g. 30° bank → rollout at 15° before.</div>
+        </div>
+      </div>
+
+      <div class="procedure-card">
+        <div class="procedure-header" onclick="toggleProc(this)">
+          <div class="proc-title">🌀 Slow Flight (Clean – Vs)</div>
+          <div style="display:flex;gap:.5rem;align-items:center"><span class="proc-tag">Region of Reversed Command</span><span class="toggle-chevron">▼</span></div>
+        </div>
+        <div class="procedure-body">
+          <div class="proc-phase">ENTRY</div>
+          <div class="proc-step"><div class="proc-label">Power</div><div class="proc-action">1500 RPM</div></div>
+          <div class="proc-step"><div class="proc-label">Attitude</div><div class="proc-action amber">Pitch up (nose high)</div></div>
+          <div class="proc-step"><div class="proc-label">Speed</div><div class="proc-action">40+5 KIAS (stabilize)</div></div>
+          <div class="proc-step"><div class="proc-label">Trim</div><div class="proc-action">TRIM</div></div>
+          <div class="proc-phase">EXIT</div>
+          <div class="proc-step"><div class="proc-label">Power</div><div class="proc-action crit">FULL POWER</div></div>
+          <div class="proc-step"><div class="proc-label">Attitude</div><div class="proc-action">Straight & Level</div></div>
+          <div class="proc-step"><div class="proc-label">Speed</div><div class="proc-action amber">80 KIAS</div></div>
+          <div class="proc-step"><div class="proc-label">Power</div><div class="proc-action">Reduce to cruise</div></div>
+          <div class="proc-note">Turning during slow flight: max 10° bank. More aileron needed. Balance with rudder. HASELL check before commencing.</div>
+        </div>
+      </div>
+
+      <div class="procedure-card">
+        <div class="procedure-header" onclick="toggleProc(this)">
+          <div class="proc-title">⛔ Power Off Stall</div>
+          <div style="display:flex;gap:.5rem;align-items:center"><span class="proc-tag">HASELL + APAL Check</span><span class="toggle-chevron">▼</span></div>
+        </div>
+        <div class="procedure-body">
+          <div class="proc-phase">ENTRY</div>
+          <div class="proc-step"><div class="proc-label">Power</div><div class="proc-action crit">IDLE</div></div>
+          <div class="proc-step"><div class="proc-label">Attitude</div><div class="proc-action amber">Pitch up (high AOA)</div></div>
+          <div class="proc-step"><div class="proc-label">Speed</div><div class="proc-action">Decreasing → stall horn at ~55 kts</div></div>
+          <div class="proc-phase">RECOVERY</div>
+          <div class="proc-step"><div class="proc-label">Release back pressure</div><div class="proc-action crit">IMMEDIATELY</div></div>
+          <div class="proc-step"><div class="proc-label">Power</div><div class="proc-action crit">FULL POWER</div></div>
+          <div class="proc-step"><div class="proc-label">Level off, regain altitude</div><div class="proc-action amber">80 kts / 1800 RPM</div></div>
+          <div class="proc-note warn">Do NOT apply full control inputs above VA (96 kts). ALWAYS note best place to land before commencing stall practice.</div>
+        </div>
+      </div>
+
+      <div class="section-header">HELL Check</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
+        <div class="abcde-row" style="margin-bottom:1rem">
+          <div class="abcde-letter">H</div>
+          <div class="abcde-content"><div class="abcde-title">Height</div><div class="abcde-items">Sufficient altitude to recover safely</div></div>
+        </div>
+        <div class="abcde-row" style="margin-bottom:1rem">
+          <div class="abcde-letter">E</div>
+          <div class="abcde-content"><div class="abcde-title">Engine Instruments on GREEN</div><div class="abcde-items">Oil pressure, oil temp, CHT all in green range. Suction gauge on GREEN (4.5–5.5 in Hg)</div></div>
+        </div>
+        <div class="abcde-row" style="margin-bottom:1rem">
+          <div class="abcde-letter">L</div>
+          <div class="abcde-content"><div class="abcde-title">Location</div><div class="abcde-items">Identify best place to land in case of engine failure</div></div>
+        </div>
+        <div class="abcde-row" style="margin-bottom:0">
+          <div class="abcde-letter">L</div>
+          <div class="abcde-content"><div class="abcde-title">Lookout</div><div class="abcde-items">Left, Front, Right CLEAR. Check for traffic in the vicinity before commencing maneuver.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMERGENCY -->
+    <div id="sec-emergency" class="panel">
+      <div class="page-title">Emergency Procedures</div>
+      <div class="page-sub">// A.B.C.D.E Framework · P2002JF · Tap to expand</div>
+
+      <div class="section-header">A.B.C.D.E — In-Flight Engine Failure</div>
+      <div style="background:var(--surface);border:1px solid rgba(255,74,74,0.2);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem">
+        <div class="abcde-row">
+          <div class="abcde-letter" style="color:var(--accent3)">A</div>
+          <div class="abcde-content"><div class="abcde-title" style="color:var(--text)">Airspeed 70 kts</div><div class="abcde-items">Best Glide Speed. Establishes maximum glide range. Do this IMMEDIATELY.</div></div>
+        </div>
+        <div class="abcde-row">
+          <div class="abcde-letter" style="color:var(--accent3)">B</div>
+          <div class="abcde-content"><div class="abcde-title" style="color:var(--text)">Best Place to Land</div><div class="abcde-items">W7S or COWLS: <strong>Wind · Surface · Slope · Size · Civilizations · Obstructions · Winds · Length · Surface</strong></div></div>
+        </div>
+        <div class="abcde-row">
+          <div class="abcde-letter" style="color:var(--accent3)">C</div>
+          <div class="abcde-content"><div class="abcde-title" style="color:var(--text)">Checklist for Restart</div><div class="abcde-items">C – Carb Heat ON · E – Electric Fuel Pump ON · F – Fuel Quantity CHECK · F – Fuel Selector SWITCH · M – Magnetos BOTH THEN START · T – Throttle AS NEEDED</div></div>
+        </div>
+        <div class="abcde-row">
+          <div class="abcde-letter" style="color:var(--accent3)">D</div>
+          <div class="abcde-content"><div class="abcde-title" style="color:var(--text)">Distress Call</div><div class="abcde-items">Transponder: <strong>SQUAWK 7700</strong> · Radio: <strong>SWITCH TO 121.5</strong><br>Call: "MAYDAY MAYDAY MAYDAY, RP-C____, TECNAM P2002JF, ENGINE FAILURE, NOW OVER ___, ALT ___, WILL MAKE FORCED LANDING ON ___, 2 PERSONS ON BOARD"</div></div>
+        </div>
+        <div class="abcde-row" style="margin-bottom:0">
+          <div class="abcde-letter" style="color:var(--accent3)">E</div>
+          <div class="abcde-content"><div class="abcde-title" style="color:var(--text)">Engine Securing</div><div class="abcde-items">T – Throttle IDLE OUT · M – Magnetos OFF · G – Generator OFF · F – Fuel Selector OFF · E – Electric Fuel Pump OFF · Master Switch STANDBY · Flaps AS NEEDED<br><strong>Below 500 ft:</strong> Master OFF, touch down slightly tail-low, apply brakes heavily.</div></div>
+        </div>
+      </div>
+
+      <div class="section-header">Emergency Scenarios</div>
+      <div class="emergency-grid">
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">⛽ Low Fuel Pressure <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Electric Fuel Pump</div><div class="step-val">ON</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Fuel Selector Valve</div><div class="step-val">CHANGE TANK</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">Check Both Fuel Quantity Indicators</div></div>
+            <div class="emerg-step"><div class="step-num">4</div><div class="step-action">If pressure doesn't build up</div><div class="step-val crit">LAND ASAP</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">🔴 Oil Pressure Exceeds MAX <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Throttle Lever</div><div class="step-val">Reduce 10%</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Oil Pressure</div><div class="step-val">Check</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">If persists</div><div class="step-val crit">LAND ASAP</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">🌡️ Oil Pressure Below MIN <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">If below 0.8 bar</div><div class="step-val crit">LAND IMMEDIATELY</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">If decreasing</div><div class="step-val crit">Engine SECURE → LAND</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">🌡️ CHT Limit Exceeded (135°C) <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Engine</div><div class="step-val">REDUCE power</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Land</div><div class="step-val crit">ASAP</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">Engine</div><div class="step-val crit">SECURE → LAND</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">🔥 Engine Fire In-Flight <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Cabin Heating</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Fuel Selector Valve</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">Electric Fuel Pump</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">4</div><div class="step-action">Throttle</div><div class="step-val crit">FULL FWD until stops</div></div>
+            <div class="emerg-step"><div class="step-num">5</div><div class="step-action">Magnetos</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">6</div><div class="step-action">Cabin Vents</div><div class="step-val">OPEN</div></div>
+            <div class="emerg-step"><div class="step-num">★</div><div class="step-action" style="color:var(--accent3)">DO NOT attempt engine restart!</div></div>
+            <div class="emerg-step"><div class="step-num">7</div><div class="step-action">Land</div><div class="step-val crit">AS SOON AS POSSIBLE</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">🔌 Electrical System Malfunction <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Generator Switch</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Master Switch</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">Generator Switch</div><div class="step-val">ON</div></div>
+            <div class="emerg-step"><div class="step-num">4</div><div class="step-action">Master Switch</div><div class="step-val">ON</div></div>
+            <div class="emerg-step"><div class="step-num">★</div><div class="step-action" style="color:var(--text-muted)">Battery can operate 20 minutes</div></div>
+            <div class="emerg-step"><div class="step-num">5</div><div class="step-action">Non-vital equipment</div><div class="step-val">SHED</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">🛬 Forced Landing (No Engine) <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Flaps</div><div class="step-val">UP</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Airspeed</div><div class="step-val">69 KIAS (glide)</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">Find suitable field</div><div class="step-val">Approach UPWIND</div></div>
+            <div class="emerg-step"><div class="step-num">4</div><div class="step-action">Fuel Selector Valve</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">5</div><div class="step-action">Electric Fuel Pump</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">6</div><div class="step-action">Magnetos</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">7</div><div class="step-action">Safety Belts</div><div class="step-val">TIGHTEN</div></div>
+            <div class="emerg-step"><div class="step-num">8</div><div class="step-action">Canopy Locks</div><div class="step-val">CHECK LOCKED</div></div>
+            <div class="emerg-step"><div class="step-num">9</div><div class="step-action">Flaps (when certain to land)</div><div class="step-val">AS NEEDED</div></div>
+            <div class="emerg-step"><div class="step-num">10</div><div class="step-action">Generator & Master</div><div class="step-val">OFF</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">⬆️ Engine Failure at Takeoff (Before Rotate) <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Throttle</div><div class="step-val crit">IDLE</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Brakes</div><div class="step-val">APPLY AS NEEDED</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">Magnetos</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">4</div><div class="step-action">Generator & Master</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">5</div><div class="step-action">Fuel Selector Valve</div><div class="step-val">OFF</div></div>
+            <div class="emerg-step"><div class="step-num">6</div><div class="step-action">Electric Fuel Pump</div><div class="step-val">OFF</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">⬆️ Engine Failure After Takeoff <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Speed</div><div class="step-val crit">KEEP MIN 51 KIAS</div></div>
+            <div class="emerg-step"><div class="step-num">★</div><div class="step-action" style="color:var(--accent3)">Find suitable landing – STRAIGHT AHEAD. Only small direction changes (max 45° L/R)</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Flaps</div><div class="step-val">AS NEEDED</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">At touchdown</div><div class="step-val">Throttle IDLE, Magnetos OFF, Fuel OFF, Fuel Pump OFF, Generator & Master OFF</div></div>
+          </div>
+        </div>
+        <div class="emergency-card">
+          <div class="emergency-header" onclick="toggleEmerg(this)">🌀 Recovery from Unintentional Spin <span class="toggle-chevron">▼</span></div>
+          <div class="emergency-body">
+            <div class="emerg-step"><div class="step-num">1</div><div class="step-action">Throttle</div><div class="step-val">IDLE (full out)</div></div>
+            <div class="emerg-step"><div class="step-num">2</div><div class="step-action">Rudder</div><div class="step-val">FULL OPPOSITE to spin until spin halts</div></div>
+            <div class="emerg-step"><div class="step-num">3</div><div class="step-action">Stick</div><div class="step-val">Move FORWARD and hold</div></div>
+            <div class="emerg-step"><div class="step-num">AS SPIN STOPS:</div><div class="step-action"></div></div>
+            <div class="emerg-step"><div class="step-num">4</div><div class="step-action">Rudder</div><div class="step-val">Set neutral</div></div>
+            <div class="emerg-step"><div class="step-num">5</div><div class="step-action">Pull stick back gently</div><div class="step-val">Stay below VNE (138 kts), Nz max 3.8</div></div>
+            <div class="emerg-step"><div class="step-num">6</div><div class="step-action">Throttle</div><div class="step-val">Restore engine power</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">Preliminary Crew Briefing (Abort Plan)</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+        <div class="proc-note warn" style="margin-bottom:1rem">This briefing is delivered BEFORE every takeoff.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div>
+            <div class="proc-phase">If malfunction BEFORE rotate</div>
+            <div style="font-size:0.85rem;color:var(--text-dim);line-height:1.8">At your command STOP → Close throttle → Stop aircraft → No actions until complete stop and parking brakes set → Magnetos OFF, Fuel Selector OFF, Fuel Pump OFF, Generator and Master OFF</div>
+          </div>
+          <div>
+            <div class="proc-phase">If malfunction AFTER rotate</div>
+            <div style="font-size:0.85rem;color:var(--text-dim);line-height:1.8">Keep speed above stall (50+ kts) → Best place to land (field on right) → Flaps as needed → Throttle IDLE → Magnetos OFF → Fuel Selector OFF → Fuel Pump OFF → Generator OFF → Master STANDBY</div>
+          </div>
+          <div>
+            <div class="proc-phase">If malfunction above 400 ft</div>
+            <div style="font-size:0.85rem;color:var(--text-dim);line-height:1.8">Keep 70 kts → Attempt restart: Fuel Pump ON, Change tank, Magnetos BOTH then START, throttle as needed → If unsuccessful: Emergency landing</div>
+          </div>
+          <div>
+            <div class="proc-phase">Transfer of Controls</div>
+            <div style="font-size:0.85rem;color:var(--text-dim);line-height:1.8">Command: "MY CONTROLS" → Response: "YOUR CONTROLS" · Positive transfer only.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAFFIC PATTERN -->
+    <div id="sec-pattern" class="panel">
+      <div class="page-title">Traffic Pattern</div>
+      <div class="page-sub">// RPT-20 · Binalonan · RWY 17 Primary Procedures</div>
+
+      <div class="section-header">Pattern Reference Points · RWY 17</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1.5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:1rem">
+        <div><div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--accent);margin-bottom:.3rem">CROSSWIND TURN</div><div style="font-size:0.88rem;color:var(--text-dim)">White Roof (warehouse) · Heading 260</div></div>
+        <div><div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--accent);margin-bottom:.3rem">DOWNWIND TURN</div><div style="font-size:0.88rem;color:var(--text-dim)">Intersection (road/highway) · Heading 350</div></div>
+        <div><div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--accent);margin-bottom:.3rem">BASE TURN</div><div style="font-size:0.88rem;color:var(--text-dim)">White Roof (far right) · Heading 080</div></div>
+        <div><div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--accent);margin-bottom:.3rem">FINAL TURN</div><div style="font-size:0.88rem;color:var(--text-dim)">Runway at 2 O'clock position</div></div>
+      </div>
+
+      <div class="pattern-phase">
+        <div class="phase-badge badge-up">UPWIND</div>
+        <div class="phase-content">
+          <div class="phase-title">Upwind · HDG 170 · Pitch for 65 · Right Rudder</div>
+          <div class="phase-items">
+            <strong>@300 ft:</strong> Flaps UP · Elec Fuel Pump OFF · Landing Lights OFF<br>
+            <strong>@400 ft:</strong> Power reduction to 2000 RPM<br>
+            <strong>@500 ft (abeam white roof):</strong> L-C-R CLEAR · Bank 15° RIGHT · Next heading 260 · Continuous climb to 700 ft<br>
+            Radio: "Binalonan Radio, RP-C___, AIRBORNE 17 FOR THE OPTION"
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-phase">
+        <div class="phase-badge badge-cross">CROSSWIND</div>
+        <div class="phase-content">
+          <div class="phase-title">Crosswind · HDG 260 · Maintain 700 ft</div>
+          <div class="phase-items">
+            Power to 1800 RPM · Maintain 700 ft<br>
+            <strong>@Abeam intersection:</strong> L-C-R CLEAR · Bank 15° RIGHT · Next heading 350
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-phase">
+        <div class="phase-badge badge-down">DOWNWIND</div>
+        <div class="phase-content">
+          <div class="phase-title">Downwind · HDG 350 · Maintain 700 ft</div>
+          <div class="phase-items">
+            Establish downwind: "TPLEX on my left, Runway's on my right, Rupertos ahead, maintaining 350, maintaining 700 ft, waiting for abeam threshold"<br>
+            Radio: "Binalonan Radio, RP-C___, DOWNWIND 17 FOR THE OPTION"<br><br>
+            <strong>@Abeam threshold:</strong> Power to 1500 RPM · Pitch up slightly (white arc) · Flaps T/O · Power to 1700/1800 RPM · Landing Lights ON · Elec Fuel Pump ON<br>
+            <strong>@Abeam white roof:</strong> L-C-R CLEAR · Bank 15° RIGHT · Next HDG 080 · Maintain 700 ft
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-phase">
+        <div class="phase-badge badge-base">BASE</div>
+        <div class="phase-content">
+          <div class="phase-title">Base · HDG 080 · Maintain 700 ft</div>
+          <div class="phase-items">
+            Power 1700/1800 RPM<br>
+            Radio: "Binalonan Radio, RP-C___, BASE 17 FOR THE OPTION"<br>
+            <strong>@Runway at 2 O'clock:</strong> L-C-R CLEAR · Power to 1400 RPM · Turn RIGHT to runway heading · Flaps FULL (within white arc)
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-phase">
+        <div class="phase-badge badge-final">FINAL</div>
+        <div class="phase-content">
+          <div class="phase-title">Final · RWY Heading · Full Flaps · 60–65 kts</div>
+          <div class="phase-items">
+            Landing Checklist: <strong>ON GLIDE · ON SPEED · ON CENTERLINE · ON CONFIGURATION · NO OBSTRUCTION</strong><br><br>
+            <strong>Before trees:</strong> Full flaps · 60–65 kts · 1400 RPM · ~300–400 ft<br>
+            <strong>Above trees/houses:</strong> 60–65 kts · 1200 RPM · ~200 ft<br>
+            <strong>Abeam 2 brown houses:</strong> Should be ~500 ft · Full flaps · 60–65 kts · 1400 RPM
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">Go-Around Procedure</div>
+      <div style="background:rgba(255,74,74,0.06);border:1px solid rgba(255,74,74,0.2);border-radius:10px;padding:1.2rem;margin-bottom:1.5rem">
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:.75rem">Reasons: unstabilized approach, not on config, runway obstruction</div>
+        <div class="proc-step"><div class="proc-label">1. Power</div><div class="proc-action crit">FULL</div></div>
+        <div class="proc-step"><div class="proc-label">2. Level off</div><div class="proc-action">Attitude</div></div>
+        <div class="proc-step"><div class="proc-label">3. Flaps</div><div class="proc-action amber">T/O</div></div>
+        <div class="proc-step"><div class="proc-label">4. Pitch for</div><div class="proc-action">65 kts</div></div>
+        <div class="proc-step"><div class="proc-label">5. Radio</div><div class="proc-action">"RP-C___, GOING AROUND"</div></div>
+        <div class="proc-step"><div class="proc-label">6. Wait for 300 ft</div><div class="proc-action amber">Continue normal procedures</div></div>
+      </div>
+
+      <div class="section-header">Aerodrome Entry/Exit</div>
+      <table class="data-table">
+        <thead><tr><th>Destination</th><th>Type (RWY 17)</th><th>Exit HDG</th><th>Entry HDG</th></tr></thead>
+        <tbody>
+          <tr><td>Urdaneta (SM/CB Mall)</td><td>Straight Out Departure</td><td class="val red">190°</td><td class="val blue">010°</td></tr>
+          <tr><td>Asingan (Green School)</td><td>Left Turn Out Departure</td><td class="val red">120°</td><td class="val blue">300°</td></tr>
+          <tr><td>Manaoag (Church)</td><td>Right Crosswind Departure</td><td class="val red">270°</td><td class="val blue">090°</td></tr>
+          <tr><td>Pozorrubio (Oval)</td><td>Right Downwind Departure</td><td class="val red">350°</td><td class="val blue">170°</td></tr>
+          <tr><td>San Manuel</td><td>Left Crosswind Departure</td><td class="val red">030°</td><td class="val blue">210°</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RADIO -->
+    <div id="sec-radio" class="panel">
+      <div class="page-title">Radio Communications</div>
+      <div class="page-sub">// Standard Radio Scripts · RPT-20 Binalonan</div>
+      <div class="section-header">Takeoff</div>
+      <div class="radio-script">
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C_____, AIRBORNE RWY 17, FOR THE OPTION"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C_____, REPORT ON DOWNWIND 17"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"WILL REPORT ON DOWNWIND 17, RP-C_____"</span></div>
+      </div>
+      <div class="section-header">Downwind</div>
+      <div class="radio-script">
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C_____, DOWNWIND 17, FOR THE OPTION"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C_____, REPORT ON BASE"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"WILL REPORT ON BASE, RP-C_____"</span></div>
+      </div>
+      <div class="section-header">Base</div>
+      <div class="radio-script">
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C_____, BASE 17, FOR THE OPTION"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C_____, CONTINUE APPROACH"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"CONTINUE APPROACH, RP-C_____"</span></div>
+      </div>
+      <div class="section-header">Entry to Station</div>
+      <div class="radio-script">
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C___, OVER (waypoint), 1500, REQUEST LANDING INSTRUCTIONS"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C___, RWY ___ IN USE, ALT SETTING 29.___, REPORT 3 MILES ___"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"WILL REPORT 3 MILES ___, RP-C___"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C___, NOW 3 MILES ___ OF THE STATION, 1500"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C___, REPORT OVERHEAD THE STATION"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"WILL REPORT OVERHEAD, RP-C___"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C___, NOW OVERHEAD STATION, 1500"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C___, REPORT ESTABLISHED DOWNWIND 17"</span></div>
+      </div>
+      <div class="section-header">Departure with Waypoints</div>
+      <div class="radio-script">
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C___, AIRBORNE RWY 17, REQUEST TO MAKE A (type) DEPARTURE TO (waypoint), (altitude), FOR ENTRY AND EXIT"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C___, REPORT OVER (waypoint)"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"WILL REPORT OVER (waypoint), RP-C___"</span></div>
+        <div class="radio-pilot">Pilot: <span class="radio-call">"Binalonan Radio, RP-C___, NOW OVER (waypoint), 1500, WILL MAKE MULTIPLE ORBITS BEFORE PROCEEDING BACK TO STATION"</span></div>
+        <div class="radio-twr">TWR: <span class="radio-call">"RP-C___, REPORT 3 MILES ___ OF THE STATION"</span></div>
+      </div>
+    </div>
+
+    <!-- P2002 Sierra info -->
+    <div id="sec-p2002s" class="panel">
+      <div class="page-title">P2002 Sierra</div>
+      <div class="page-sub">// RP-C1886 · RP-C1993</div>
+      <div class="proc-note warn" style="margin-bottom:1.5rem">⚠️ RP-C1886 and RP-C1993 do NOT have an Avionics Master switch.</div>
+      <div class="section-header">Key Differences from JF</div>
+      <table class="data-table">
+        <thead><tr><th>Feature</th><th>P2002 Sierra</th><th>P2002 JF</th></tr></thead>
+        <tbody>
+          <tr><td>Avionics Master</td><td class="val red">NONE</td><td class="val green">YES</td></tr>
+          <tr><td>Canopy style</td><td>Sliding/fixed</td><td>Fixed hinged</td></tr>
+          <tr><td>Registration prefix</td><td class="val">RP-C18xx</td><td class="val">RP-C197x / RP-C46xx</td></tr>
+          <tr><td>CHT Gauge label</td><td>Left panel cluster</td><td>Right panel cluster</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="sec-p2002jf" class="panel">
+      <div class="page-title">P2002 JF</div>
+      <div class="page-sub">// RP-C1971, RP-C1972, RP-C1975, RP-C4604, RP-C4605</div>
+      <div class="proc-note" style="margin-bottom:1.5rem">Has Avionics Master switch. Ensure it's ON before using radios. Set to OFF during engine securing.</div>
+      <div class="section-header">JF-Specific Instruments</div>
+      <div class="instrument-grid">
+        <div class="instrument-card">
+          <div class="instrument-name">ADF Indicator</div>
+          <div class="instrument-desc">Automatic Direction Finder. Shows bearing to NDB station. Used for navigation to/from radio beacons.</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">VOR Indicator</div>
+          <div class="instrument-desc">VHF Omnidirectional Range. Used for radio navigation. GTN 225 GPS/NAV available.</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">GTX 328 Transponder</div>
+          <div class="instrument-desc">Mode C transponder with altitude encoding. SQUAWK codes: 1200 VFR, 7700 Emergency.</div>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-name">GNC 255A / GMA 340</div>
+          <div class="instrument-desc">COM/NAV radio unit and audio panel. Manages radio communications and navigation signals.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="sec-quiz" class="panel">
+      <div class="page-title">Quiz Mode</div>
+      <div class="page-sub">// Test your knowledge · 40 Questions across all topics</div>
+      <div class="quiz-container">
+        <div id="quiz-main">
+          <div class="quiz-progress">
+            <div class="progress-bar"><div class="progress-fill" id="quiz-progress-fill" style="width:0%"></div></div>
+            <div class="progress-text" id="quiz-progress-text">0 / 40</div>
+          </div>
+          <div class="quiz-card">
+            <div class="quiz-category" id="quiz-cat"></div>
+            <div class="quiz-question" id="quiz-q"></div>
+            <div class="quiz-options" id="quiz-opts"></div>
+            <div class="quiz-feedback" id="quiz-fb"></div>
+            <button class="quiz-next" id="quiz-next" onclick="nextQuestion()">Next Question →</button>
+          </div>
+        </div>
+        <div class="quiz-score" id="quiz-score">
+          <div class="score-big" id="score-num">—</div>
+          <div class="score-label" id="score-msg">Quiz complete!</div>
+          <button class="score-restart" onclick="startQuiz()">↺ Restart Quiz</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLASHCARDS -->
+    <div id="sec-flashcards" class="panel">
+      <div class="page-title">Flashcards</div>
+      <div class="page-sub">// Tap card to reveal answer · 35 cards</div>
+      <select class="fc-cat-select" id="fc-cat" onchange="filterFlashcards()">
+        <option value="all">All Categories</option>
+        <option value="vspeeds">V-Speeds</option>
+        <option value="instruments">Instruments</option>
+        <option value="procedures">Procedures</option>
+        <option value="limits">Engine Limits</option>
+        <option value="emergency">Emergency</option>
+      </select>
+      <div class="flashcard-scene">
+        <div class="flashcard-inner" id="fc-card" onclick="flipCard()">
+          <div class="flashcard-face flashcard-front">
+            <div class="fc-hint">Tap to reveal answer</div>
+            <div class="fc-q" id="fc-question">Loading...</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="fc-hint">Answer</div>
+            <div class="fc-a" id="fc-answer">—</div>
+            <div class="fc-a-desc" id="fc-desc"></div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="fc-btn" onclick="prevCard()">← Prev</button>
+        <div class="fc-counter" id="fc-counter">1 / 35</div>
+        <button class="fc-btn" onclick="nextCard()">Next →</button>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end app -->
+
+<script>
+// ================== DATA ==================
+
+const checklistData = {
+  "Cockpit Inspection": [
+    { label: "Park Brakes", value: "ENGAGED" },
+    { label: "Aircraft AROW", value: "ONBOARD" },
+    { label: "Flight Control", value: "CHECK" },
+    { label: "Throttle Friction", value: "ADJUST" },
+    { label: "Circuit Breakers", value: "ALL IN" },
+    { label: "Master Switch", value: "ON" },
+    { label: "Electric Fuel Pump", value: "ON (check press.)" },
+    { label: "Flaps", value: "CHECK (FULL)" },
+    { label: "Fuel Quantity", value: "CHECK" },
+    { label: "Fuel Selector Valve", value: "LESS TANK" },
+    { label: "Seat", value: "ADJUST" },
+    { label: "Seatbelt & Shoulder Harness", value: "FASTENED" },
+    { label: "Avionics Master (JF only)", value: "ON" },
+    { label: "Intercom", value: "ON" },
+    { label: "Radio", value: "ON" },
+  ],
+  "Engine Starting": [
+    { label: "Chronometer / Clock", value: "START" },
+    { label: "Voltmeter (12V)", value: "CHECK" },
+    { label: "Ammeter", value: "CHECK" },
+    { label: "Throttle", value: "IDLE" },
+    { label: "Choke", value: "AS NEEDED (if cold)" },
+    { label: "Fuel Selector Valve", value: "LESS TANK" },
+    { label: "Electric Fuel Pump", value: "ON" },
+    { label: "Propeller Area", value: "CLEAR" },
+    { label: "Nav / Strobe Lights (if req)", value: "ON" },
+    { label: "Ignition Switch", value: "BOTH → START" },
+    { label: "Oil Pressure", value: "CHECK (4 bar)" },
+    { label: "Choke", value: "OFF" },
+    { label: "Generator", value: "ON (check positive)" },
+    { label: "Ammeter", value: "CHARGING" },
+    { label: "Voltmeter", value: "CHECK (14V)" },
+    { label: "Engine Instruments", value: "GREEN" },
+    { label: "Propeller RPM", value: "1000–1200 RPM" },
+    { label: "Electric Fuel Pump", value: "OFF" },
+    { label: "Fuel Pressure", value: "CHECK" },
+  ],
+  "Run-Up": [
+    { label: "Park Brakes", value: "ENGAGED" },
+    { label: "Oil Temperature", value: "50–110°C" },
+    { label: "CHT", value: "MAX 135°C" },
+    { label: "Oil Pressure", value: "2–5 bar" },
+    { label: "Throttle", value: "ABOVE 1400 RPM" },
+    { label: "Fuel Pressure", value: "2.2–5.8 PSI" },
+    { label: "Generator Light", value: "CHECK" },
+    { label: "Fuel Selector Valve", value: "FULLEST TANK" },
+    { label: "Ignition Switch", value: "L–R (max 130 RPM drop)" },
+    { label: "Carburetor Heat", value: "CHECK" },
+    { label: "Throttle", value: "FULL CHECK" },
+    { label: "Throttle", value: "IDLE CHECK" },
+    { label: "Park Brakes", value: "RELEASE" },
+  ],
+  "Before Takeoff": [
+    { label: "Park Brakes", value: "ENGAGED" },
+    { label: "Transponder", value: "ALT" },
+    { label: "Landing Lights", value: "ON" },
+    { label: "Flaps", value: "CHECK T/O" },
+    { label: "Electric Fuel Pump", value: "ON" },
+    { label: "Carburetor Heat", value: "OFF" },
+    { label: "Flight Controls", value: "CHECK" },
+    { label: "Fuel Selector Valve", value: "OFF (fullest tank)" },
+    { label: "Trims", value: "NEUTRAL" },
+    { label: "Seatbelt & Shoulder Harness", value: "FASTENED" },
+    { label: "Canopy", value: "CLOSED" },
+    { label: "Abort Plan", value: "OBTAIN" },
+    { label: "Briefing", value: "OBTAIN" },
+    { label: "Park Brakes", value: "RELEASE" },
+  ],
+  "Takeoff": [
+    { label: "Full Throttle", value: "INST. GREEN ARC" },
+    { label: "RPM", value: "2100+/-100 RPM" },
+    { label: "Rotate", value: "45 KIAS OR ABOVE" },
+    { label: "Positive Climb", value: "FLAPS UP (55 kts)" },
+    { label: "Landing Light", value: "OFF" },
+    { label: "Electric Fuel Pump", value: "OFF" },
+    { label: "Throttle", value: "2000 RPM" },
+    { label: "Climb Speed", value: "65 KNOTS" },
+  ],
+  "Cruise": [
+    { label: "Throttle", value: "1700 RPM" },
+    { label: "Engine Instruments", value: "GREEN" },
+    { label: "Fuel Selector Valve", value: "FULLEST TANK (30 min)" },
+  ],
+  "Before Landing": [
+    { label: "Fuel Selector Valve", value: "FULLEST TANK" },
+    { label: "Landing Light", value: "ON" },
+    { label: "Electric Fuel Pump", value: "ON" },
+    { label: "Flaps", value: "T/O" },
+  ],
+  "Final Approach": [
+    { label: "Final Approach Speed", value: "500 ft minimum" },
+    { label: "Flaps", value: "FULL (65 kts)" },
+    { label: "Touch Down", value: "51 knots" },
+    { label: "Carburetor Heat", value: "ON (if required)" },
+  ],
+  "After Landing": [
+    { label: "Transponder", value: "STANDBY" },
+    { label: "Landing Light", value: "OFF" },
+    { label: "Flaps", value: "UP" },
+    { label: "Electric Fuel Pump", value: "OFF" },
+  ],
+  "Engine Shut Down": [
+    { label: "Park Brakes", value: "ENGAGED" },
+    { label: "All Radio", value: "OFF" },
+    { label: "Intercom", value: "OFF" },
+    { label: "Avionics Master (JF)", value: "OFF" },
+    { label: "Transponder", value: "OFF" },
+    { label: "GPS", value: "OFF" },
+    { label: "Ignition Switch", value: "OFF" },
+    { label: "Nav / Strobe Lights", value: "OFF" },
+    { label: "Generator", value: "OFF" },
+    { label: "Master Switch", value: "OFF" },
+    { label: "Fuel Selector Valve", value: "OFF" },
+    { label: "Chronometer / Clock", value: "STOP" },
+    { label: "Park Brakes", value: "RELEASE" },
+  ],
+};
+
+const quizData = [
+  { cat: "V-Speeds", q: "What is the Never Exceed Speed (VNE) for the P2002JF?", opts: ["110 kts", "120 kts", "138 kts", "150 kts"], a: 2, explain: "VNE is 138 kts. Flying above this speed risks structural damage. Marked as the RED LINE on the airspeed indicator." },
+  { cat: "V-Speeds", q: "What is the actual rotation speed (Vr) used at RPT-20?", opts: ["42 kts (book)", "50 kts", "60 kts (actual)", "55 kts"], a: 2, explain: "While book Vr is 42 kts, actual practice at RPT-20 is 60 kts for a safer margin." },
+  { cat: "V-Speeds", q: "What is the best glide speed (Vglide) for the P2002JF?", opts: ["60 kts", "65 kts", "69 kts", "75 kts"], a: 2, explain: "Best glide speed is 69 kts (70 kts actual). Use this immediately in an engine failure — A in A.B.C.D.E." },
+  { cat: "V-Speeds", q: "What is the best RATE of climb (Vy)?", opts: ["56 kts", "60 kts", "66 kts", "70 kts"], a: 2, explain: "Vy = 66 kts (book). Gives best altitude gain per unit of time. Used during climb at 65 kts actual." },
+  { cat: "V-Speeds", q: "What is the max flap extension speed (VFE) for FULL flaps?", opts: ["57 kts", "62 kts", "67 kts", "72 kts"], a: 2, explain: "VFE full flaps = 67 kts book / 69 kts actual. Only extend FULL flaps within the white arc (30–67 kts)." },
+  { cat: "Instruments", q: "What does a suction gauge reading of 3.8 in Hg indicate?", opts: ["Normal operation", "High vacuum", "Below minimum — gyros may be unreliable", "Above maximum"], a: 2, explain: "Normal suction range is 4.5–5.5 in Hg. Below 4.0 (red line minimum) means AI and HI may not be reliable." },
+  { cat: "Instruments", q: "What color arc indicates the flap operating range on the ASI?", opts: ["Green arc", "Yellow arc", "White arc", "Red arc"], a: 2, explain: "The WHITE arc (30–67 kts) shows the flap operating range. Flaps may only be extended within this arc." },
+  { cat: "Instruments", q: "Which instruments are driven by the vacuum/suction system?", opts: ["ASI and VSI", "Attitude Indicator and Heading Indicator", "Altimeter and VSI", "Turn Coordinator and AI"], a: 1, explain: "The Attitude Indicator (AI) and Heading Indicator (HI) are gyroscopic instruments powered by the suction system." },
+  { cat: "Instruments", q: "The P2002 Sierra (RP-C1886, RP-C1993) differs from the JF because it:", opts: ["Has an additional GPS", "Does not have an Avionics Master", "Has a different engine", "Uses AVGAS only"], a: 1, explain: "RP-C1886 and RP-C1993 do NOT have an Avionics Master switch. The JF variants do." },
+  { cat: "Engine", q: "What is the minimum oil temperature before takeoff?", opts: ["30°C", "40°C", "50°C", "60°C"], a: 2, explain: "Minimum oil temperature for takeoff is 50°C. Let the engine warm up at 1000–1200 RPM." },
+  { cat: "Engine", q: "What is the maximum CHT (Cylinder Head Temperature)?", opts: ["110°C", "120°C", "130°C", "135°C"], a: 3, explain: "Max CHT is 135°C. If exceeded, reduce power and land ASAP. Secure engine if necessary." },
+  { cat: "Engine", q: "What is the maximum oil pressure limit?", opts: ["5 bar", "6 bar", "7 bar", "8 bar"], a: 2, explain: "Maximum oil pressure is 7 bar. Above this, reduce engine power. Normal range is 2–5 bar." },
+  { cat: "Engine", q: "What is the minimum oil pressure before mandatory landing?", opts: ["1.2 bar", "0.8 bar", "1.5 bar", "0.5 bar"], a: 1, explain: "If oil pressure falls below 0.8 bar (minimum), land immediately. If continuously decreasing, secure engine and land." },
+  { cat: "Engine", q: "How long can the battery operate if the generator fails?", opts: ["10 minutes", "15 minutes", "20 minutes", "30 minutes"], a: 2, explain: "The battery can operate for approximately 20 minutes if the generator fails. Shed non-vital equipment immediately." },
+  { cat: "Engine", q: "What fuel is approved for the Rotax 912S2?", opts: ["AVGAS 100 only", "MOGAS only", "MOGAS ASTM D4814/EN 228 or AVGAS 100LL", "Any 87 octane fuel"], a: 2, explain: "Approved fuels: MOGAS (ASTM D4814/EN 228, min RON95) or AVGAS 100LL (ASTM D910)." },
+  { cat: "Procedures", q: "What is the correct order for EXIT from a CLIMB (P-A-S-T or A-S-P-T)?", opts: ["P-A-S-T", "A-S-P-T", "S-A-P-T", "P-S-A-T"], a: 1, explain: "ENTRY to climb is P-A-S-T. EXIT from climb is A-S-P-T: Attitude level → Speed increasing to 80 kts → Power to 1800 RPM → Trim." },
+  { cat: "Procedures", q: "When do you start the Exit from a DESCENT?", opts: ["At the exact altitude", "100 ft before altitude", "50 ft before altitude", "200 ft before altitude"], a: 2, explain: "For descent, exit (P-A-S-T) at 50 ft BEFORE the target altitude. For climb, recover at the EXACT altitude." },
+  { cat: "Procedures", q: "During a Level Turn, when should you start rolling out?", opts: ["At the target heading", "10° before target heading", "At half your bank angle before heading", "20° before target heading"], a: 2, explain: "Start rollout at HALF your bank angle before the desired heading. E.g., 30° bank → begin rollout 15° before." },
+  { cat: "Procedures", q: "What is the max bank angle during a climb turn?", opts: ["10°", "15°", "20°", "25°"], a: 1, explain: "Maximum bank angle in a climbing turn is 15°. This prevents excessive altitude loss and maintains climb performance." },
+  { cat: "Procedures", q: "What is the RPM for NORMAL straight and level cruise?", opts: ["1800 RPM", "2000 RPM", "2100 RPM", "2500 RPM"], a: 2, explain: "Normal S&L cruise is 2100 RPM at approximately 80 KIAS. Fast cruise: 2500 RPM. Slow: 1900 RPM." },
+  { cat: "Traffic Pattern", q: "At what altitude is the traffic pattern flown at RPT-20?", opts: ["500 ft", "600 ft", "700 ft", "800 ft"], a: 2, explain: "The traffic pattern altitude at RPT-20 is 700 ft MSL." },
+  { cat: "Traffic Pattern", q: "When abeam the threshold on downwind, what do you do first?", opts: ["Deploy full flaps", "Power to 1500 RPM", "Turn to base", "Apply carb heat"], a: 1, explain: "Abeam threshold: Power to 1500 RPM → pitch up slightly for white arc → Deploy Flaps T/O → Power to 1700/1800 → Lights ON → Fuel Pump ON." },
+  { cat: "Traffic Pattern", q: "What is the reference point for turning CROSSWIND on RWY 17?", opts: ["Intersection (road)", "White roof (warehouse)", "Power station", "TPLEX"], a: 1, explain: "The turning crosswind reference point is the WHITE ROOF (warehouse building) at approximately 500 ft during upwind." },
+  { cat: "Traffic Pattern", q: "When should you report on the radio during UPWIND?", opts: ["Before takeoff", "Right after airborne", "After reaching 700 ft", "After turning crosswind"], a: 1, explain: "Report 'AIRBORNE 17 FOR THE OPTION' right after becoming airborne. Tower will instruct to report on downwind." },
+  { cat: "Traffic Pattern", q: "On BASE leg, when do you deploy FULL flaps?", opts: ["On turning base", "On final approach", "When runway is at 2 O'clock", "At 500 ft on final"], a: 2, explain: "On base leg, when the runway is at your 2 O'clock position: Power to 1400 RPM, turn right to runway heading, deploy FULL flaps (within white arc)." },
+  { cat: "Emergency", q: "In the A.B.C.D.E emergency procedure, what does 'A' stand for?", opts: ["Aviate — maintain control", "Airspeed 70 kts (best glide)", "Alert ATC", "Activate fuel pump"], a: 1, explain: "'A' = Airspeed 70 kts (best glide speed). This is the FIRST action in any engine failure — maintain glide speed." },
+  { cat: "Emergency", q: "In the C (Checklist for Restart) of ABCDE, what is the memory aid?", opts: ["CEFMT", "CEFFMT", "CMEFFT", "CFFMET"], a: 1, explain: "C-E-F-F-M-T: Carb Heat ON → Electric Fuel Pump ON → Fuel Quantity CHECK → Fuel Selector SWITCH → Magnetos BOTH START → Throttle AS NEEDED." },
+  { cat: "Emergency", q: "What transponder code do you squawk in an emergency?", opts: ["7500", "7600", "7700", "1200"], a: 2, explain: "SQUAWK 7700 for emergencies. Switch radio to 121.5 MHz and broadcast MAYDAY x3." },
+  { cat: "Emergency", q: "In an engine fire in-flight, throttle action is:", opts: ["Throttle to idle immediately", "Throttle FULL FORWARD until engine stops", "Throttle to 50%", "Do nothing with throttle"], a: 1, explain: "Throttle FULL FORWARD until the engine stops — this starves the fire of fuel. DO NOT attempt restart after engine fire." },
+  { cat: "Emergency", q: "After an engine failure immediately after takeoff, the direction change limit is:", opts: ["No turns at all", "Small changes, max 30° left/right", "Small changes, max 45° left/right", "Full 180° turn back"], a: 2, explain: "Only small direction changes not exceeding 45° left or right. Never attempt a full 180° turn back to the runway at low altitude." },
+  { cat: "Emergency", q: "For unintentional spin recovery, the rudder input is:", opts: ["Neutral", "Same direction as spin", "Opposite direction to spin", "Full left always"], a: 2, explain: "Apply FULL RUDDER in the OPPOSITE direction of the spin until the spin halts. Then push stick forward." },
+  { cat: "Abort Briefing", q: "In the Preliminary Crew Briefing, what is the phrase for transfer of controls?", opts: ['"Give me controls"', '"MY CONTROLS" → YOUR CONTROLS"', '"Ready to take control"', '"You have it"'], a: 1, explain: "Positive transfer: Commander says 'MY CONTROLS', other pilot responds 'YOUR CONTROLS'. This confirms transfer." },
+  { cat: "Weights", q: "What is the Maximum Takeoff Weight (MTOW) of the P2002JF?", opts: ["520 kg", "550 kg", "580 kg", "620 kg"], a: 2, explain: "MTOW is 580 kg. Maximum baggage is 20 kg. Standard empty weight is 337 kg with 243 kg useful load." },
+  { cat: "Instruments", q: "What does the APAL Check stand for?", opts: ["Altitude-Power-Airspeed-Lookout", "Attitude-Performance-Attitude-Lookout", "Airspeed-Pitch-Altitude-Level", "Approach-Pattern-Altitude-Level"], a: 1, explain: "APAL = Attitude → Performance (check instruments) → Attitude → Lookout. Perform continuously during all maneuvers." },
+  { cat: "Procedures", q: "During the run-up, what is the maximum allowable RPM drop per magneto?", opts: ["100 RPM", "130 RPM", "150 RPM", "200 RPM"], a: 1, explain: "Maximum RPM drop per magneto during run-up is 130 RPM. Higher drop indicates ignition problems." },
+  { cat: "Traffic Pattern", q: "What is the Go-Around airspeed target after applying full power?", opts: ["55 kts", "60 kts", "65 kts", "70 kts"], a: 2, explain: "In a go-around: Full power → Level off → Flaps T/O → pitch for 65 kts. Wait for 300 ft then continue normal procedures." },
+  { cat: "Emergency", q: "During a power-off stall recovery, what is the FIRST action?", opts: ["Apply full power", "Level wings", "Release back pressure", "Apply carb heat"], a: 2, explain: "FIRST: Release back pressure immediately to reduce angle of attack and allow the wings to start flying again. Then full power." },
+  { cat: "Procedures", q: "The Electric Fuel Pump should be OFF during:", opts: ["Takeoff", "Landing", "Cruise flight (normal ops)", "Engine start"], a: 2, explain: "Electric Fuel Pump should be OFF during normal cruise flight. It should be ON during: engine start, takeoff, landing, and if low fuel pressure occurs." },
+  { cat: "V-Speeds", q: "The Yellow Arc on the ASI represents:", opts: ["Flap extension range", "Normal cruise range", "Caution range — smooth air only (110–138 kts)", "Never exceed zone"], a: 2, explain: "Yellow arc = 110–138 kts. This is the caution range — only operated in smooth air conditions." },
+  { cat: "Traffic Pattern", q: "Final approach landing checklist (5 items):", opts: ["On Glide, On Speed, On Centerline, On Config, No Obstruction", "Gear, Flaps, Speed, Fuel, Radio", "GUMPS check", "Throttle, Trim, Transponder, Lights, Mixture"], a: 0, explain: "ON GLIDE · ON SPEED · ON CENTERLINE · ON CONFIGURATION · NO OBSTRUCTION — these are the 5 landing checklist items." },
+];
+
+const flashcards = [
+  { cat: "vspeeds", q: "VNE", a: "138 kts", desc: "Never Exceed Speed — RED LINE on ASI" },
+  { cat: "vspeeds", q: "VNO", a: "110 kts", desc: "Max Structural Cruise — smooth air only above" },
+  { cat: "vspeeds", q: "VA", a: "96 kts", desc: "Maneuvering Speed — no full/abrupt control above" },
+  { cat: "vspeeds", q: "Vy (Best Rate of Climb)", a: "66 kts", desc: "65 kts actual at RPT-20" },
+  { cat: "vspeeds", q: "Vx (Best Angle of Climb)", a: "56 kts", desc: "55 kts actual — clears obstacles" },
+  { cat: "vspeeds", q: "Vglide (Best Glide)", a: "69 kts", desc: "70 kts actual — use in engine failure (ABCDE: A)" },
+  { cat: "vspeeds", q: "VFE Full Flaps", a: "67 kts", desc: "Never extend full flaps above this speed (69 kts actual)" },
+  { cat: "vspeeds", q: "VFE T/O Flaps", a: "97 kts", desc: "Max speed for takeoff flap setting (95 kts actual)" },
+  { cat: "vspeeds", q: "Vr (Rotation Speed)", a: "42 kts book / 60 kts actual", desc: "Rotate at 60 kts in RPT-20 operations" },
+  { cat: "vspeeds", q: "Vapp Final Approach", a: "51 kts book / 60–65 kts actual", desc: "Maintain 60–65 kts on final with full flaps" },
+  { cat: "vspeeds", q: "White Arc on ASI", a: "30–67 kts", desc: "Flap operating range (Vso to Vfe)" },
+  { cat: "vspeeds", q: "Green Arc on ASI", a: "40–110 kts", desc: "Normal operating range" },
+  { cat: "vspeeds", q: "Yellow Arc on ASI", a: "110–138 kts", desc: "Caution — smooth air only" },
+  { cat: "instruments", q: "Suction Gauge Normal Range", a: "4.5–5.5 in Hg", desc: "Below 4.0 (red line) = AI and HI may be unreliable" },
+  { cat: "instruments", q: "Voltmeter Normal Range", a: "12–14 Volts", desc: "Red line min: 10.5V. Generator fault = above 16V" },
+  { cat: "instruments", q: "What drives the AI and HI?", a: "Vacuum/Suction System", desc: "Gyroscopic instruments — check suction gauge is in GREEN" },
+  { cat: "instruments", q: "APAL Check", a: "Attitude → Performance → Attitude → Lookout", desc: "Perform continuously during all airwork maneuvers" },
+  { cat: "instruments", q: "HELL Check — acronym meaning", a: "Height · Engine instruments GREEN · Location (best place to land) · Lookout (L-F-R CLEAR)", desc: "Perform before all stalls and aerobatics" },
+  { cat: "limits", q: "Max Oil Temperature", a: "130°C", desc: "Min for takeoff: 50°C. Normal: 90–110°C" },
+  { cat: "limits", q: "Max CHT", a: "135°C", desc: "If exceeded: reduce power, land ASAP, secure engine" },
+  { cat: "limits", q: "Max Oil Pressure", a: "7 bar", desc: "Min: 0.8 bar (land immediately). Normal: 2–5 bar" },
+  { cat: "limits", q: "Max Takeoff Weight", a: "580 kg", desc: "Useful load: 243 kg. Max baggage: 20 kg" },
+  { cat: "limits", q: "Total Fuel Capacity", a: "100 liters (99L usable)", desc: "50L per tank. 1L total unusable (0.5L per tank)" },
+  { cat: "procedures", q: "Climb entry procedure", a: "P-A-S-T", desc: "Power → Attitude (500 FPM) → Speed 65 kts → Trim" },
+  { cat: "procedures", q: "Climb exit procedure", a: "A-S-P-T", desc: "Attitude level → Speed 80 kts → Power 1800 RPM → Trim" },
+  { cat: "procedures", q: "Descent entry & exit", a: "P-A-S-T both ways", desc: "Entry: 1400/1500 RPM, 500 FPM down, 70 kts. Exit at 50 ft before target." },
+  { cat: "procedures", q: "Level turn entry", a: "B-B-B: Bank → Back Pressure → Balance", desc: "Rollout at half your bank angle before target heading" },
+  { cat: "procedures", q: "Go-around procedure", a: "Full power → Level off → Flaps T/O → 65 kts", desc: "Radio: 'RP-C___, GOING AROUND'. Wait 300 ft then resume pattern." },
+  { cat: "procedures", q: "Traffic pattern altitude at RPT-20", a: "700 ft", desc: "Binalonan aerodrome (RPT-20) traffic pattern altitude" },
+  { cat: "procedures", q: "Run-up max mag drop", a: "130 RPM per magneto", desc: "Check at above 1400 RPM. Both should drop within limit." },
+  { cat: "emergency", q: "ABCDE in engine failure", a: "Airspeed 70 → Best place to land → Checklist restart → Distress call → Engine securing", desc: "A is FIRST and most important — maintain 70 kts best glide" },
+  { cat: "emergency", q: "Emergency squawk code", a: "7700", desc: "Also switch radio to 121.5 MHz for MAYDAY call" },
+  { cat: "emergency", q: "Restart checklist (C in ABCDE)", a: "Carb Heat ON, Elec Fuel Pump ON, Fuel Qty CHECK, Fuel Selector SWITCH, Magnetos BOTH→START, Throttle as needed", desc: "Memory: C-E-F-F-M-T" },
+  { cat: "emergency", q: "Min airspeed after engine failure at takeoff", a: "51 KIAS minimum", desc: "Only small direction changes (max 45° L/R). Do NOT turn back." },
+  { cat: "emergency", q: "Transfer of controls phraseology", a: "'MY CONTROLS' → 'YOUR CONTROLS'", desc: "Positive transfer must be verbally confirmed both ways" },
+];
+
+// ================== STATE ==================
+let currentSection = 'home';
+let checkStates = {};
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let currentFlashcards = [...flashcards];
+let fcIndex = 0;
+
+// ================== INIT ==================
+document.addEventListener('DOMContentLoaded', () => {
+  buildChecklists();
+  startQuiz();
+  loadFlashcard();
+});
+
+// ================== NAVIGATION ==================
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  switchSection(name);
+}
+
+function switchSection(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('sec-' + name);
+  if (el) el.classList.add('active');
+  currentSection = name;
+  // update nav
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + name + "'")) {
+      n.classList.add('active');
+    }
+  });
+}
+
+// ================== CHECKLISTS ==================
+function buildChecklists() {
+  const container = document.getElementById('checklists-container');
+  let html = '';
+  Object.entries(checklistData).forEach(([title, items], groupIdx) => {
+    html += `<div class="checklist-group">
+      <div class="checklist-title">${title}</div>`;
+    items.forEach((item, idx) => {
+      const key = `${groupIdx}-${idx}`;
+      html += `<div class="checklist-item" id="ci-${key}" onclick="toggleCheck('${key}')">
+        <div class="check-box" id="cb-${key}"></div>
+        <div class="check-label">${item.label}</div>
+        <div class="check-value">${item.value}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+}
+
+function toggleCheck(key) {
+  checkStates[key] = !checkStates[key];
+  const item = document.getElementById('ci-' + key);
+  const box = document.getElementById('cb-' + key);
+  if (checkStates[key]) {
+    item.classList.add('checked');
+    box.innerHTML = '✓';
+  } else {
+    item.classList.remove('checked');
+    box.innerHTML = '';
+  }
+}
+
+function resetChecks() {
+  checkStates = {};
+  document.querySelectorAll('.checklist-item').forEach(el => el.classList.remove('checked'));
+  document.querySelectorAll('.check-box').forEach(el => el.innerHTML = '');
+}
+
+// ================== TOGGLES ==================
+function toggleProc(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.toggle-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  header.classList.toggle('open');
+  if (chevron) chevron.classList.toggle('open');
+}
+
+function toggleEmerg(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.toggle-chevron');
+  const isOpen = body.classList.contains('open');
+  // close others
+  document.querySelectorAll('.emergency-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.emergency-header .toggle-chevron').forEach(c => c.classList.remove('open'));
+  if (!isOpen) {
+    body.classList.add('open');
+    if (chevron) chevron.classList.add('open');
+  }
+}
+
+// ================== QUIZ ==================
+function startQuiz() {
+  quizIndex = 0;
+  quizScore = 0;
+  quizAnswered = false;
+  const shuffled = [...quizData].sort(() => Math.random() - 0.5);
+  window._quizQuestions = shuffled;
+  document.getElementById('quiz-main').style.display = 'block';
+  document.getElementById('quiz-score').classList.remove('show');
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = window._quizQuestions[quizIndex];
+  if (!q) { showScore(); return; }
+  quizAnswered = false;
+  const total = window._quizQuestions.length;
+  document.getElementById('quiz-progress-fill').style.width = (quizIndex / total * 100) + '%';
+  document.getElementById('quiz-progress-text').textContent = `${quizIndex} / ${total}`;
+  document.getElementById('quiz-cat').textContent = '// ' + q.cat;
+  document.getElementById('quiz-q').textContent = q.q;
+  document.getElementById('quiz-fb').className = 'quiz-feedback';
+  document.getElementById('quiz-fb').textContent = '';
+  document.getElementById('quiz-next').classList.remove('show');
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const optsEl = document.getElementById('quiz-opts');
+  optsEl.innerHTML = q.opts.map((opt, i) =>
+    `<button class="quiz-option" onclick="answerQuiz(${i})">
+      <span class="opt-letter">${letters[i]}</span>${opt}
+    </button>`
+  ).join('');
+}
+
+function answerQuiz(selected) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = window._quizQuestions[quizIndex];
+  const correct = q.a;
+  const buttons = document.querySelectorAll('.quiz-option');
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    else if (i === selected && selected !== correct) btn.classList.add('wrong');
+  });
+  const fb = document.getElementById('quiz-fb');
+  if (selected === correct) {
+    quizScore++;
+    fb.className = 'quiz-feedback correct-fb show';
+    fb.textContent = '✓ Correct! ' + q.explain;
+  } else {
+    fb.className = 'quiz-feedback wrong-fb show';
+    fb.textContent = '✗ ' + q.explain;
+  }
+  document.getElementById('quiz-next').classList.add('show');
+}
+
+function nextQuestion() {
+  quizIndex++;
+  if (quizIndex >= window._quizQuestions.length) {
+    showScore();
+  } else {
+    showQuestion();
+  }
+}
+
+function showScore() {
+  document.getElementById('quiz-main').style.display = 'none';
+  const scoreEl = document.getElementById('quiz-score');
+  scoreEl.classList.add('show');
+  const pct = Math.round(quizScore / window._quizQuestions.length * 100);
+  document.getElementById('score-num').textContent = pct + '%';
+  const msgs = ['', 'Keep studying!', 'Getting there!', 'Good effort!', 'Well done!', 'Excellent!'];
+  let msg = quizScore === window._quizQuestions.length ? '🏆 Perfect Score!' :
+    pct >= 80 ? '✈️ Ready to fly!' :
+    pct >= 60 ? '📚 Keep reviewing!' :
+    '📖 Study more!';
+  document.getElementById('score-msg').textContent = `${quizScore}/${window._quizQuestions.length} correct · ${msg}`;
+}
+
+// ================== FLASHCARDS ==================
+function filterFlashcards() {
+  const cat = document.getElementById('fc-cat').value;
+  currentFlashcards = cat === 'all' ? [...flashcards] : flashcards.filter(f => f.cat === cat);
+  fcIndex = 0;
+  loadFlashcard();
+}
+
+function loadFlashcard() {
+  const card = currentFlashcards[fcIndex];
+  if (!card) return;
+  document.getElementById('fc-question').textContent = card.q;
+  document.getElementById('fc-answer').textContent = card.a;
+  document.getElementById('fc-desc').textContent = card.desc || '';
+  document.getElementById('fc-counter').textContent = `${fcIndex + 1} / ${currentFlashcards.length}`;
+  document.getElementById('fc-card').classList.remove('flipped');
+}
+
+function flipCard() {
+  document.getElementById('fc-card').classList.toggle('flipped');
+}
+
+function prevCard() {
+  fcIndex = (fcIndex - 1 + currentFlashcards.length) % currentFlashcards.length;
+  loadFlashcard();
+}
+
+function nextCard() {
+  fcIndex = (fcIndex + 1) % currentFlashcards.length;
+  loadFlashcard();
+}
+</script>
+</body>
+</html>
